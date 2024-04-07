@@ -7,8 +7,6 @@ COPY package.json pnpm-lock.yaml ./
 # Install dependencies
 RUN pnpm install
 
-ENV NEXT_TELEMETRY_DISABLED 1
-
 # Copy all files
 COPY . .
 
@@ -21,11 +19,6 @@ RUN npm i -g pnpm
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/package.json ./package.json
 COPY --from=base /app/.next ./.next
-
-# Set environment variable and expose port
-ENV NODE_ENV=development
-ENV CHOKIDAR_USEPOLLING=true
-ENV WATCHPACK_POLLING=true
 
 EXPOSE 3000
 
