@@ -1,0 +1,33 @@
+# Use node:20 as base image
+FROM node:20 AS base
+WORKDIR /app
+RUN npm i -g pnpm
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
+RUN pnpm install
+
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Copy all files
+COPY . .
+
+# Use node:20-alpine3.19 for the release
+FROM node:20-alpine3.19 as release
+WORKDIR /app
+RUN npm i -g pnpm
+
+# Copy necessary files from previous stages
+COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/package.json ./package.json
+COPY --from=base /app/.next ./.next
+
+# Set environment variable and expose port
+ENV NODE_ENV=development
+ENV CHOKIDAR_USEPOLLING=true
+ENV WATCHPACK_POLLING=true
+
+EXPOSE 3000
+
+# Start the application in development mode
+CMD ["pnpm", "dev"]
